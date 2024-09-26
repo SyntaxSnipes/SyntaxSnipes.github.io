@@ -23,6 +23,7 @@ body {
     max-width: 600px;
     padding: 20px;
     background-color: #121212;
+    color: #f0f0f0; /* Light font color for the container */
     border-radius: 10px;
     box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
 }
