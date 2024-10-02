@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory</title>
+    <link rel="stylesheet" href="istyle.css">
+</head>
+<body>
+    <div id="navbar">
+        <img src="images/BookbackICON.png" alt="">
+        <label class="hamburger-menu">
+            <input type="checkbox" />
+        </label>
+        <aside class="sidebar">
+            <nav>
+                <a href="index.html">Home</a>
+                <a href="inventory.html">Inventory</a>
+            </nav>
+        </aside>
+    </div>
+    <section id="sec1">
+        <span id="search">
+            <input type="text" id="search-input" placeholder="Search for a book by name">
+            <button id="search-button">Search</button>
+        </span>
+        <ul id="book-list"></ul>
+    </section>
+
+    <script>
+        let books = [];  // Store books globally for searching
+        let uniqueBooks = [];  // Store deduplicated books globally
+        let duplicateCounts = {};  // Store duplicate counts globally
+
+        // Function to deduplicate books based on ISBN (excluding last 5 digits) and grade
+        function deduplicateBooks(data) {
+    const uniqueBooksMap = {};
+    duplicateCounts = {};
+
+    data.forEach(book => {
+        const isbnFull = book.id.split('-')[0]; // Use the full ISBN without trimming the last 5 digits
+        const grade = book.grade; // Get the grade
+
+        // Create a unique key combining the full ISBN and grade
+        const uniqueKey = `${isbnFull}-${grade}`;
+
+        // Count duplicates
+        if (duplicateCounts[uniqueKey]) {
+            duplicateCounts[uniqueKey]++;
+        } else {
+            duplicateCounts[uniqueKey] = 1;
+            uniqueBooksMap[uniqueKey] = book; // Store unique book information
+        }
+    });
+
+    // Convert uniqueBooksMap back to an array for display
+    return Object.values(uniqueBooksMap);
+}
+
+        // Fetch books and deduplicate them
+        function fetchBooks() {
+            // Fetch book details from your local server
+            fetch('http://localhost:3001/books')  // Adjust the port if needed
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok: ' + response.statusText);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    books = data;  // Store all fetched books for searching
+                    uniqueBooks = deduplicateBooks(books);  // Deduplicate books
+                    displayBooks(uniqueBooks);  // Display unique books initially
+                })
+                .catch(error => {
+                    console.error('Error fetching books:', error);
+                });
+        }
+
+        // Function to display books
+        function displayBooks(booksToDisplay) {
+            const bookList = document.getElementById('book-list');
+            bookList.innerHTML = ''; // Clear the current list
+
+            // Create an array to hold all <li> elements for blurring later
+            const listItems = [];
+
+            booksToDisplay.forEach(book => {
+    const isbn = book.id.split('-')[0]; // Extract full ISBN part
+    const li = document.createElement('li');
+    li.style.cursor = 'pointer'; // Change cursor to pointer for better UX
+
+    // Fetch book image data
+    fetch(`https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn}`)
+        .then(response => response.json())
+        .then(bookData => {
+            const img = document.createElement('img');
+            img.style.borderRadius = '4px';
+            const title = book.name || 'Title not available';
+
+            // Handle Google Books data
+            if (bookData.items && bookData.items.length > 0) {
+                const bookInfo = bookData.items[0].volumeInfo;
+                const imageLinks = bookInfo.imageLinks;
+                const coverImage = imageLinks?.large || imageLinks?.medium || imageLinks?.thumbnail || 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/ac/No_image_available.svg/1200px-No_image_available.svg.png';
+                img.src = coverImage;
+            } else {
+                // Fallback to Amazon if no image found on Google Books
+                img.src = `https://images-na.ssl-images-amazon.com/images/P/${isbn}.L.jpg`;
+            }
+
+            img.alt = title;
+            img.style.maxWidth = '200px';  // Adjust the image size as needed
+
+            // Handle price safely (fallback if not a number or missing)
+            let priceDisplay = 'Price not available';
+            if (book.price && !isNaN(book.price)) {
+                priceDisplay = `AED ${parseFloat(book.price).toFixed(2)}`;
+            }
+
+            // Display the book information, title, image, and stock
+            li.appendChild(img);
+            li.appendChild(document.createTextNode(title));
+            li.appendChild(document.createElement('br'));
+            li.appendChild(document.createTextNode(`Grade: ${book.grade}`));
+            li.appendChild(document.createElement('br'));
+            li.appendChild(document.createTextNode(`${priceDisplay}`));
+
+            // Fix the duplicate count display logic
+            const countKey = `${book.id.split('-')[0]}-${book.grade}`;  // Use full ISBN and grade as the key
+            const countDisplay = `No. in stock: ${duplicateCounts[countKey] || 1}`; // Fallback to 1 if no duplicates found
+            li.appendChild(document.createElement('br'));
+            li.appendChild(document.createTextNode(countDisplay));
+
+            // Create a span to hold ISBN and initially hide it
+            const isbnInfo = document.createElement('span');
+            isbnInfo.textContent = `ISBN: ${book.id}`;
+            isbnInfo.style.display = 'none'; // Hide it initially
+            li.appendChild(isbnInfo); // Append the ISBN info to the list item
+
+            // Add click event listener to toggle ISBN visibility and blur effect
+            li.onclick = (event) => {
+                event.stopPropagation(); // Prevent click event from bubbling up to the document
+
+                // Reset blur on all list items
+                listItems.forEach(item => {
+                    item.style.filter = 'none'; // Remove blur
+                    const isbnSpan = item.querySelector('span');
+                    if (isbnSpan) {
+                        isbnSpan.style.display = 'none'; // Hide ISBN
+                    }
+                });
+
+                // Show or hide ISBN for the clicked item
+                if (isbnInfo.style.display === 'none') {
+                    isbnInfo.style.display = 'inline'; // Show ISBN
+                    li.style.height = 'auto'; // Expand the clicked item
+                    li.style.filter = 'none'; // Remove blur from the clicked item
+                } else {
+                    isbnInfo.style.display = 'none'; // Hide ISBN
+                }
+
+                // Apply blur to all other list items
+                li.style.filter = 'none'; // Ensure the clicked item is not blurred
+                listItems.forEach(item => {
+                    if (item !== li) {
+                        item.style.filter = 'blur(5px)'; // Blur the other items
+                    }
+                });
+            };
+
+            // Store the created list item in the array
+            listItems.push(li); // Add the current item to the listItems array
+
+            bookList.appendChild(li);
+        })
+        .catch(error => {
+            console.error('Error fetching book image from Google:', error);
+
+            // Fallback to Amazon if Google Books fails completely
+            const img = document.createElement('img');
+            img.src = `https://images-na.ssl-images-amazon.com/images/P/${isbn}.L.jpg`; // Fallback Amazon image
+            img.alt = 'No cover image available';
+            img.style.maxWidth = '200px';  // Adjust the image size as needed
+
+            // Handle price safely (fallback if not a number or missing)
+            let priceDisplay = 'Price not available';
+            if (book.price && !isNaN(book.price)) {
+                priceDisplay = `AED ${parseFloat(book.price).toFixed(2)}`;
+            }
+
+            li.appendChild(img);
+            li.appendChild(document.createTextNode(` Title: ${book.name}, ISBN: ${book.id}, Grade: ${book.grade}, ${priceDisplay}`));
+            bookList.appendChild(li);
+        });
+});
+
+
+            // Event listener for clicks outside the list items to remove blur and hide ISBN
+            document.addEventListener('click', () => {
+                listItems.forEach(item => {
+                    item.style.height = '260px'; // Reset height to auto
+                    item.style.filter = 'none'; // Remove blur from all items
+                    const isbnSpan = item.querySelector('span');
+                    if (isbnSpan) {
+                        isbnSpan.style.display = 'none'; // Hide ISBN
+                    }
+                });
+            });
+        }
+
+        // Function to search books by name
+        function searchBooks() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const filteredBooks = uniqueBooks.filter(book => book.name.toLowerCase().includes(searchTerm));
+            displayBooks(filteredBooks);
+        }
+
+        // Event listener for the search button
+        document.getElementById('search-button').addEventListener('click', searchBooks);
+
+        // Fetch and display books when the page loads
+        fetchBooks();
+    </script>
+</body>
+</html>
