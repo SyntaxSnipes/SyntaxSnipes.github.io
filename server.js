@@ -34,6 +34,11 @@ connection.connect(err => {
     console.log('Connected to the database');
 });
 
+app.use(cors({
+    origin: 'https://bookback-517b2g7qt-mohammed-aayan-pathans-projects.vercel.app'
+}));
+
+
 
 app.get('/books', (req, res) => {
     db.query('SELECT * FROM books', (err, results) => {

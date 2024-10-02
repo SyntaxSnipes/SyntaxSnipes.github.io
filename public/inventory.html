@@ -59,8 +59,7 @@
 
         // Fetch books and deduplicate them
         function fetchBooks() {
-            // Fetch book details from your local server
-            fetch('bookback-517b2g7qt-mohammed-aayan-pathans-projects.vercel.app')  // Adjust the port if needed
+            fetch('https://bookback-517b2g7qt-mohammed-aayan-pathans-projects.vercel.app/books')
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Network response was not ok: ' + response.statusText);
