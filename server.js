@@ -8,7 +8,14 @@ const fs = require('fs');
 const app = express();
 const PORT = 3001;
 
-app.use(cors());
+const corsOptions = {
+    origin: 'https://bookback-517b2g7qt-mohammed-aayan-pathans-projects.vercel.app/books', // Change this to your Vercel app's URL
+    methods: 'GET,POST', // You can specify other HTTP methods if needed
+    credentials: true // Allow credentials if necessary (e.g., for cookies or HTTP authentication)
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -34,9 +41,6 @@ connection.connect(err => {
     console.log('Connected to the database');
 });
 
-app.use(cors({
-    origin: 'https://bookback-517b2g7qt-mohammed-aayan-pathans-projects.vercel.app'
-}));
 
 
 
