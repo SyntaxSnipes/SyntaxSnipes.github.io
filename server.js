@@ -9,12 +9,13 @@ const app = express();
 const PORT = 3001;
 
 const corsOptions = {
-    origin: 'https://www.bookback.me', // Your frontend URL
-    methods: 'GET,POST', // Allowed HTTP methods
-    credentials: true // Allow credentials if necessary
+    origin: ['https://www.bookback.me', 'https://bookback-517b2g7qt-mohammed-aayan-pathans-projects.vercel.app'], // Allow both your main site and Vercel
+    methods: 'GET,POST', 
+    credentials: true
 };
 
 app.use(cors(corsOptions));
+
 
 
 app.use(express.json());
