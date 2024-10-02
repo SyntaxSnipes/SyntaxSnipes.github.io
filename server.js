@@ -63,7 +63,7 @@ app.post('/books', (req, res) => {
     const id = `${isbn}-${unique_code}`;
     const received_date = new Date();
 
-    db.query(
+    connection.query(
         'INSERT INTO books (id, name, received_date, price, grade) VALUES (?, ?, ?, ?, ?)',
         [id, received_date, price, grade],
         (err) => {
