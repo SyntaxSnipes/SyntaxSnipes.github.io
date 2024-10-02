@@ -9,12 +9,13 @@ const app = express();
 const PORT = 3001;
 
 const corsOptions = {
-    origin: 'https://bookback-517b2g7qt-mohammed-aayan-pathans-projects.vercel.app/books', // Change this to your Vercel app's URL
-    methods: 'GET,POST', // You can specify other HTTP methods if needed
-    credentials: true // Allow credentials if necessary (e.g., for cookies or HTTP authentication)
+    origin: 'https://www.bookback.me', // Your frontend URL
+    methods: 'GET,POST', // Allowed HTTP methods
+    credentials: true // Allow credentials if necessary
 };
 
 app.use(cors(corsOptions));
+
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -45,7 +46,7 @@ connection.connect(err => {
 
 
 app.get('/books', (req, res) => {
-    db.query('SELECT * FROM books', (err, results) => {
+    connection.query('SELECT * FROM books', (err, results) => {
         if (err) {
             console.error('Database query error:', err);  // Log the error
             return res.status(500).json({ error: 'Database query failed' });
@@ -54,6 +55,7 @@ app.get('/books', (req, res) => {
         res.json(results);
     });
 });
+
 
 app.post('/books', (req, res) => {
     const { isbn, unique_code, price, grade } = req.body;
