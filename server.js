@@ -72,10 +72,8 @@ app.get('/test-db', (req, res) => {
     });
 });
 
-// Fetch books
 app.get('/books', (req, res) => {
     const query = 'SELECT * FROM books';
-
     connection.query(query, (err, results) => {
         if (err) {
             return res.status(500).json({ error: 'Error fetching books' });
@@ -83,6 +81,7 @@ app.get('/books', (req, res) => {
         res.json(results);
     });
 });
+
 
 // Log request information for debugging
 app.use((req, res, next) => {
