@@ -6,17 +6,18 @@ const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
-
-// CORS configuration
 const corsOptions = {
-    origin: process.env.CLIENT_URL || 'http://localhost:3001',  // Use environment variable for allowed origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true,
+    origin: 'http://localhost:3001', // Update with your local URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type'],
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+
+
+const caCert = fs.readFileSync(path.join(__dirname, process.env.CA_CERT_PATH || 'ca.pem'));
+
+
 
 app.use(express.static(path.join(__dirname, 'public')));
 
