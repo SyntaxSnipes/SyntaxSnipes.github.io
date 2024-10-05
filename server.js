@@ -8,18 +8,17 @@ require('dotenv').config();
 // CORS configuration
 const corsOptions = {
     origin: (origin, callback) => {
-        // Allow requests from specific origins
-        const allowedOrigins = ['https://www.bookback-tgq9.onrender.com', 'http://localhost:3001']; // Update with your domains
+        const allowedOrigins = ['http://localhost:3001'];
         if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
             callback(null, true);
         } else {
             callback(new Error('Not allowed by CORS'));
         }
     },
-    credentials: true // Allow credentials
+    credentials: true
 };
 
-app.use(cors()); 
+app.use(cors(corsOptions));
 
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
@@ -31,17 +30,16 @@ const pool = mysql.createPool({
     database: process.env.DB_NAME,
 });
 
+// Example API route to fetch books
 app.get('/api/books', async (req, res) => {
     try {
         const [rows] = await pool.query('SELECT * FROM books');
-        console.log('Books fetched:', rows);
         res.json(rows);
     } catch (error) {
-        console.error('Error fetching books:', error); // Log the error
-        res.status(500).json({ error: 'Error fetching books' });
+        console.error('Database query failed:', error);
+        res.status(500).json({ error: 'Database query failed' });
     }
 });
-
 
 // Serve index.html on root
 app.get('/', (req, res) => {
