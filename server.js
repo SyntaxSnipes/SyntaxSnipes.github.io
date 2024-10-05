@@ -9,7 +9,7 @@ require('dotenv').config();
 const corsOptions = {
     origin: (origin, callback) => {
         // Allow requests from specific origins
-        const allowedOrigins = ['https://www.bookback.me', 'http://localhost:3001']; // Update with your domains
+        const allowedOrigins = ['https://www.bookback-tgq9.onrender.com', 'http://localhost:3001']; // Update with your domains
         if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
             callback(null, true);
         } else {
