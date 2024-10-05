@@ -28,6 +28,7 @@
     </section>
 
     <script>
+        
         let books = [];  // Store books globally for searching
         let uniqueBooks = [];  // Store deduplicated books globally
         let duplicateCounts = {};  // Store duplicate counts globally
@@ -58,23 +59,30 @@
 }
 
         // Fetch books and deduplicate them
-        function fetchBooks() {
-            fetch('https://bookback-517b2g7qt-mohammed-aayan-pathans-projects.vercel.app/books')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok: ' + response.statusText);
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    books = data;  // Store all fetched books for searching
-                    uniqueBooks = deduplicateBooks(books);  // Deduplicate books
-                    displayBooks(uniqueBooks);  // Display unique books initially
-                })
-                .catch(error => {
-                    console.error('Error fetching books:', error);
-                });
-        }
+// Fetch books and deduplicate them
+function fetchBooks() {
+fetch('https://bookback-i1o4juwqu-mohammed-aayan-pathans-projects.vercel.app/books', {
+    method: 'GET', // Change as needed
+    headers: {
+        'Content-Type': 'application/json', // Change as needed
+        // Any other headers you might need
+    },
+    credentials: 'include', // Include this if your API requires credentials
+})
+.then(response => {
+    if (!response.ok) {
+        throw new Error('Network response was not ok: ' + response.statusText);
+    }
+    return response.json();
+})
+.then(data => {
+    console.log('Fetched books:', data);
+})
+.catch(error => {
+    console.error('Fetch error:', error);
+});
+}
+
 
         // Function to display books
         function displayBooks(booksToDisplay) {
